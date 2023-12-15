@@ -35,13 +35,17 @@ func New[T comparable](options ...Option) Queue[T] {
 }
 
 func (q *Queue[T]) Push(value T) {
-	if q.maxSize > 0 && len(q.data) == q.maxSize {
+	if q.reachedMaximum() {
 		_, _ = q.Peek()
 	}
 
 	q.data = append(q.data, value)
 	q.putIndex(value)
 
+}
+
+func (q *Queue[T]) reachedMaximum() bool {
+	return q.maxSize > 0 && len(q.data) == q.maxSize
 }
 
 func (q *Queue[T]) Peek() (T, error) {
@@ -76,10 +80,7 @@ func (q *Queue[T]) putIndex(value T) {
 }
 
 func (q *Queue[T]) peekIndex(value T) {
-	count, ok := q.index[value]
-	if !ok {
-		return
-	}
+	count, _ := q.index[value]
 
 	if count == 1 {
 		delete(q.index, value)
